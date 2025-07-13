@@ -15,14 +15,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let score = 0;
     let gameInProgress = false;
 
-    // --- File Paths ---
-    // Adjust these paths if your file structure is different.
-    const flagsBasePath = 'svg/'; // Using SVG files
-    const flagFileName = `${currentCountryCode.toLowerCase()}.svg`;
+    // --- Corrected File Paths ---
+    // This double-path is correct based on your folder structure and server setup.
+    const flagsBasePath = 'country-flags-main/country-flags-main/svg/';
+    const countriesJsonPath = 'country-flags-main/country-flags-main/countries.json';
 
     // --- Load Country Data ---
     fetch(countriesJsonPath)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Network response was not ok for ${countriesJsonPath}`);
+            }
+            return response.json();
+        })
         .then(data => {
             countries = data;
             countryCodes = Object.keys(countries);
@@ -30,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => {
             console.error('Error loading country data:', error);
-            feedbackElement.textContent = 'Could not load country data. Please check file paths.';
+            feedbackElement.textContent = 'Could not load game data. Check file paths and that Live Server is running.';
         });
 
     function startGame() {
@@ -48,22 +53,30 @@ document.addEventListener('DOMContentLoaded', () => {
         guessInput.disabled = false;
         guessButton.classList.remove('hidden');
         nextButton.classList.add('hidden');
+        flagContainer.classList.add('hidden');
 
         // Get a random country
         const randomIndex = Math.floor(Math.random() * countryCodes.length);
         currentCountryCode = countryCodes[randomIndex];
-        const flagFileName = `${currentCountryCode.toLowerCase()}.png`;
+        const flagFileName = `${currentCountryCode.toLowerCase()}.svg`;
 
         // Display the flag
         flagImage.src = `${flagsBasePath}${flagFileName}`;
-        flagContainer.classList.remove('hidden');
-
-        // Hide the flag after 1 second
-        setTimeout(() => {
-            if (gameInProgress) {
-                flagContainer.classList.add('hidden');
-            }
-        }, 1000); // 1000 milliseconds = 1 second
+        
+        flagImage.onload = () => {
+            flagContainer.classList.remove('hidden');
+            // Hide the flag after 1 second
+            setTimeout(() => {
+                if (gameInProgress) {
+                    flagContainer.classList.add('hidden');
+                }
+            }, 1000);
+        };
+        
+        flagImage.onerror = () => {
+             console.error(`Failed to load flag: ${flagImage.src}`);
+             feedbackElement.textContent = 'Error: Could not load flag image. Check paths.';
+        };
     }
 
     // --- Handle User's Guess ---
@@ -73,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const userGuess = guessInput.value.trim().toLowerCase();
         const correctCountryName = countries[currentCountryCode].toLowerCase();
 
-        flagContainer.classList.remove('hidden'); // Show the flag again for context
+        flagContainer.classList.remove('hidden');
         guessInput.disabled = true;
         gameInProgress = false;
 
@@ -101,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Allow pressing Enter to submit a guess
     guessInput.addEventListener('keyup', (event) => {
-        if (event.key === 'Enter') {
+        if (event.key === 'Enter' && !guessButton.classList.contains('hidden')) {
             handleGuess();
         }
     });
