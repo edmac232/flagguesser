@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flag Guesser Game</title>
+    <link rel="stylesheet" href="style.css">
+</head><body>
+    <div class="container">
+        <h1>Guess the Flag!</h1>
+        <div id="score-container">
+            Score: <span id="score">0</span>
+        </div>
+        <div id="flag-container" class="hidden">
+            <img id="flag-image" src="" alt="Country Flag">
+        </div>
+        <div id="guess-container">
+            <p id="feedback"></p>
+            <input type="text" id="guess-input" placeholder="Enter country name">
+            <button id="guess-button">Guess</button>
+            <button id="next-button" class="hidden">Next Flag</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
